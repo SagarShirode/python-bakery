@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Add New Order</h2>
+    <form method="POST" action="{{ url_for('add_order') }}">
+        <div class="form-group">
+            <label for="customer_name">Customer Name</label>
+            <input type="text" id="customer_name" name="customer_name" required>
+        </div>
+        <div class="form-group">
+            <label for="item">Item</label>
+            <input type="text" id="item" name="item" required>
+        </div>
+        <div class="form-group">
+            <label for="quantity">Quantity</label>
+            <input type="number" id="quantity" name="quantity" required>
+        </div>
+        <div class="form-group">
+            <label for="price">Price</label>
+            <input type="number" id="price" name="price" required>
+        </div>
+        <button type="submit">Add Order</button>
+    </form>
+</div>
+{% endblock %}
+
