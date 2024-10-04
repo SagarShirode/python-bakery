@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bakery Management System</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <h1>Bakery Orders</h1>
+    
+    <form method="GET" action="{{ url_for('index') }}">
+        <label for="search">Search Orders:</label>
+        <input type="text" id="search" name="search" value="{{ request.args.get('search', '') }}">
+        <label for="status">Filter by Status:</label>
+        <select id="status" name="status">
+            <option value="">All</option>
+            <option value="Pending" {% if request.args.get('status') == 'Pending' %}selected{% endif %}>Pending</option>
+            <option value="Completed" {% if request.args.get('status') == 'Completed' %}selected{% endif %}>Completed</option>
+        </select>
+        <button type="submit">Search</button>
+    </form>
+    
+    <a href="{{ url_for('add_order') }}" class="button">Add New Order</a>
+    <a href="{{ url_for('export_orders') }}" class="button">Export Orders (CSV)</a>
+
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Item</th>
+            <th>Quantity</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.name }}</td>
+            <td>{{ order.item }}</td>
+            <td>{{ order.quantity }}</td>
+            <td>{{ order.status }}</td>
+            <td>
+                <a href="{{ url_for('edit_order', id=order.id) }}">Edit</a> |
+                <a href="{{ url_for('delete_order', id=order.id) }}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
+
