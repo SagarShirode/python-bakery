@@ -1,7 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-
+import xlsxwriter
+import csv
+import io
+from flask import make_response
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
@@ -127,6 +130,37 @@ def delete_order(id):
     db.session.delete(order)
     db.session.commit()
     return redirect(url_for('order_management'))
+
+
+# Route for exporting orders
+@app.route('/export_orders')
+def export_orders():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    # Get all orders from the database
+    orders = Order.query.all()
+
+    # Create a StringIO object to write the CSV data to
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Write the headers
+    writer.writerow(['Customer Name', 'Order Item', 'Quantity', 'Status'])
+
+    # Write the order data
+    for order in orders:
+        writer.writerow([order.customer_name, order.order_item, order.quantity, order.status])
+
+    # Move the cursor of the StringIO object to the beginning
+    output.seek(0)
+
+    # Create the response object
+    response = make_response(output.getvalue())
+    response.headers["Content-Disposition"] = "attachment; filename=orders.csv"
+    response.headers["Content-type"] = "text/csv"
+    
+    return response
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

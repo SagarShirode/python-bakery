@@ -13,7 +13,6 @@
             <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
         </div>
         <a href="{{ url_for('add_order') }}" class="btn btn-primary mb-3">Add Order</a>
-        <a href="{{ url_for('export_orders') }}" class="btn btn-success mb-3">Export Orders</a> <!-- Add this line -->
         <table class="table">
             <thead>
                 <tr>
