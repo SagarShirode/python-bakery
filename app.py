@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import xlsxwriter
 import csv
 import io
+from flask import request
 from flask import make_response
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -161,6 +162,52 @@ def export_orders():
     response.headers["Content-type"] = "text/csv"
     
     return response
+
+# Route for importing orders
+@app.route('/import_orders', methods=['GET', 'POST'])
+def import_orders():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        file = request.files['file']
+        if not file:
+            return "No file uploaded", 400
+
+        # Read and process the CSV file
+        stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
+        csv_input = csv.reader(stream)
+
+        # Skip the header row
+        next(csv_input)
+
+        # Loop through the CSV and insert the data into the database
+        for row in csv_input:
+            # Ensure that each row has exactly 4 fields (customer_name, order_item, quantity, status)
+            if len(row) != 4:
+                # Skip the row if it doesn't have the correct number of fields
+                continue
+
+            # Try to convert quantity to integer, skip the row if conversion fails
+            try:
+                quantity = int(row[2])
+            except ValueError:
+                continue
+
+            # Add the order to the database
+            new_order = Order(customer_name=row[0], order_item=row[1], quantity=quantity, status=row[3])
+            db.session.add(new_order)
+        
+        # Commit the transaction after processing all rows
+        db.session.commit()
+
+        return redirect(url_for('order_management'))
+
+    return render_template('import_orders.html')
+
+
+
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
